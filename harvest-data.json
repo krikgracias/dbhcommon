@@ -1,0 +1,19 @@
+{
+  "month": "January 2026",
+  "uptime": "100%",
+  "uptimeDetails": "The hutch was stocked every Mon/Wed/Sat",
+  "metrics": {
+    "loaves": 0,
+    "books": 0,
+    "eggs": 0,
+    "seeds": 0,
+    "plants": 0,
+    "produce": 0
+  },
+  "contributions": [
+    "North fence mended",
+    "10 lbs of grain donated to hutch",
+    "New compost bin construction started",
+    "Community bulletin board installed"
+  ]
+}
