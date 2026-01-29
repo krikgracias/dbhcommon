@@ -205,12 +205,15 @@
             color: #2d2416;
             font-size: 2em;
             font-weight: bold;
+            display: inline-flex;
+            align-items: baseline;
+            gap: 8px;
         }
 
         .metric-unit {
             color: #5d4e37;
-            font-size: 0.6em;
-            margin-left: 5px;
+            font-size: 0.5em;
+            font-weight: normal;
         }
 
         .contributions-list {
@@ -333,7 +336,10 @@
                 </div>
                 <div class="metric">
                     <div class="metric-label">Eggs Exchanged</div>
-                    <div class="metric-value"><span class="editable" id="eggs">156</span><span class="metric-unit">dozen</span></div>
+                    <div class="metric-value">
+                        <span class="editable" id="eggs">156</span>
+                        <span class="metric-unit">dozen</span>
+                    </div>
                 </div>
                 <div class="metric">
                     <div class="metric-label">Investment in Tomorrow</div>
@@ -345,7 +351,10 @@
                 </div>
                 <div class="metric">
                     <div class="metric-label">Produce Exchanged</div>
-                    <div class="metric-value"><span class="editable" id="produce">67</span><span class="metric-unit">lbs</span></div>
+                    <div class="metric-value">
+                        <span class="editable" id="produce">67</span>
+                        <span class="metric-unit">lbs</span>
+                    </div>
                 </div>
             </div>
         </div>
