@@ -1,0 +1,479 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HERNANDO NODE 01 - Community Health Monitor</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background: linear-gradient(135deg, #1a2e1a 0%, #2d4a2d 100%);
+            color: #f5f1e8;
+            font-family: Georgia, 'Times New Roman', serif;
+            min-height: 100vh;
+            padding: 20px;
+            position: relative;
+            overflow-x: hidden;
+        }
+
+        /* Animated background grid */
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image: 
+                linear-gradient(rgba(139, 115, 85, 0.05) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(139, 115, 85, 0.05) 1px, transparent 1px);
+            background-size: 50px 50px;
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            position: relative;
+            z-index: 1;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 40px;
+            padding: 30px;
+            background: linear-gradient(rgba(42, 35, 25, 0.85), rgba(52, 45, 35, 0.85)), 
+                        url('') center/cover no-repeat;
+            background-size: cover;
+            background-position: center;
+            border: 2px solid #8b7355;
+            border-radius: 8px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.4);
+            min-height: 200px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            position: relative;
+        }
+
+        .header::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(rgba(42, 35, 25, 0.7), rgba(52, 45, 35, 0.7));
+            border-radius: 6px;
+            z-index: 0;
+        }
+
+        .header > * {
+            position: relative;
+            z-index: 1;
+        }
+
+        .image-upload-note {
+            font-size: 0.8em;
+            color: #a89984;
+            margin-top: 10px;
+            font-style: italic;
+        }
+
+        .node-title {
+            font-size: 2.5em;
+            color: #d4af37;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.7);
+            margin-bottom: 10px;
+            letter-spacing: 2px;
+            font-weight: normal;
+        }
+
+        .subtitle {
+            font-size: 1.1em;
+            color: #c9b896;
+            letter-spacing: 3px;
+        }
+
+        .status-banner {
+            background: linear-gradient(90deg, rgba(125, 155, 111, 0.3) 0%, rgba(125, 155, 111, 0.1) 100%);
+            border-left: 4px solid #7d9b6f;
+            padding: 20px;
+            margin-bottom: 30px;
+            border-radius: 4px;
+        }
+
+        .status-banner.healthy {
+            border-left-color: #7d9b6f;
+            background: linear-gradient(90deg, rgba(125, 155, 111, 0.3) 0%, rgba(125, 155, 111, 0.1) 100%);
+        }
+
+        .uptime-display {
+            font-size: 1.3em;
+            margin-bottom: 8px;
+        }
+
+        .uptime-value {
+            color: #7d9b6f;
+            font-weight: bold;
+            font-size: 1.5em;
+        }
+
+        .uptime-details {
+            color: #c9b896;
+            font-size: 0.9em;
+        }
+
+        .section {
+            background: rgba(73, 63, 48, 0.7);
+            border: 2px solid #8b7355;
+            border-radius: 8px;
+            padding: 25px;
+            margin-bottom: 25px;
+            backdrop-filter: blur(10px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+        }
+
+        .section-title {
+            color: #d4af37;
+            font-size: 1.4em;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #8b7355;
+            display: flex;
+            align-items: center;
+        }
+
+        .section-title::before {
+            content: '>';
+            margin-right: 10px;
+            color: #7d9b6f;
+        }
+
+        .metric-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .metric {
+            background: linear-gradient(135deg, #f4e8d0 0%, #e8dcc4 100%);
+            padding: 15px;
+            border-radius: 6px;
+            border: 2px solid #8b7355;
+            box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.1),
+                        0 2px 8px rgba(0, 0, 0, 0.2);
+            position: relative;
+        }
+
+        .metric::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: 
+                repeating-linear-gradient(
+                    0deg,
+                    transparent,
+                    transparent 2px,
+                    rgba(139, 115, 85, 0.03) 2px,
+                    rgba(139, 115, 85, 0.03) 4px
+                );
+            pointer-events: none;
+            border-radius: 4px;
+        }
+
+        .metric-label {
+            color: #5d4e37;
+            font-size: 0.85em;
+            margin-bottom: 8px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            font-weight: bold;
+        }
+
+        .metric-value {
+            color: #2d2416;
+            font-size: 2em;
+            font-weight: bold;
+        }
+
+        .metric-unit {
+            color: #5d4e37;
+            font-size: 0.6em;
+            margin-left: 5px;
+        }
+
+        .contributions-list {
+            list-style: none;
+        }
+
+        .contribution-item {
+            background: linear-gradient(135deg, #f4e8d0 0%, #e8dcc4 100%);
+            padding: 12px 15px;
+            margin-bottom: 10px;
+            border-radius: 4px;
+            border: 2px solid #8b7355;
+            display: flex;
+            align-items: center;
+            color: #2d2416;
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+        }
+
+        .contribution-item::before {
+            content: '✓';
+            color: #7d9b6f;
+            font-weight: bold;
+            margin-right: 12px;
+            font-size: 1.2em;
+        }
+
+        .footer-message {
+            text-align: center;
+            margin-top: 40px;
+            padding: 30px;
+            background: rgba(212, 175, 55, 0.2);
+            border: 2px solid #d4af37;
+            border-radius: 8px;
+            font-size: 1.3em;
+            color: #d4af37;
+            letter-spacing: 1px;
+            text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5);
+            font-style: italic;
+        }
+
+        .timestamp {
+            text-align: center;
+            color: #a89984;
+            font-size: 0.9em;
+            margin-top: 20px;
+        }
+
+        .pulse {
+            display: inline-block;
+            width: 10px;
+            height: 10px;
+            background: #7d9b6f;
+            border-radius: 50%;
+            margin-right: 8px;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% {
+                opacity: 1;
+                box-shadow: 0 0 0 0 rgba(125, 155, 111, 0.7);
+            }
+            50% {
+                opacity: 0.7;
+                box-shadow: 0 0 0 10px rgba(125, 155, 111, 0);
+            }
+        }
+
+        .editable {
+            background: rgba(212, 175, 55, 0.2);
+            padding: 2px 6px;
+            border-radius: 3px;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+
+        .editable:hover {
+            background: rgba(212, 175, 55, 0.3);
+        }
+
+        @media (max-width: 768px) {
+            .node-title {
+                font-size: 1.8em;
+            }
+            
+            .metric-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <!-- To add your treeline photo: Replace the empty url('') in the CSS .header background property with url('your-image-path.jpg') -->
+            <div class="node-title">The Dan Brown Hill Common</div>
+            <div class="subtitle">MONTHLY HARVEST REPORT</div>
+        </div>
+
+        <div class="status-banner healthy">
+            <div class="uptime-display">
+                <span class="pulse"></span>
+                COMMUNITY RELIABILITY: <span class="uptime-value">100%</span>
+            </div>
+            <div class="uptime-details">
+                The hutch was stocked every Mon/Wed/Sat
+            </div>
+        </div>
+
+        <div class="section">
+            <div class="section-title">Our Harvest</div>
+            <div class="metric-grid">
+                <div class="metric">
+                    <div class="metric-label">Loaves Distributed</div>
+                    <div class="metric-value"><span class="editable" id="loaves">24</span></div>
+                </div>
+                <div class="metric">
+                    <div class="metric-label">Books Swapped</div>
+                    <div class="metric-value"><span class="editable" id="books">12</span></div>
+                </div>
+                <div class="metric">
+                    <div class="metric-label">Eggs Exchanged</div>
+                    <div class="metric-value"><span class="editable" id="eggs">156</span><span class="metric-unit">dozen</span></div>
+                </div>
+                <div class="metric">
+                    <div class="metric-label">Investment in Tomorrow</div>
+                    <div class="metric-value"><span class="editable" id="seeds">89</span></div>
+                </div>
+                <div class="metric">
+                    <div class="metric-label">Plants Left/Taken</div>
+                    <div class="metric-value"><span class="editable" id="plants">34</span></div>
+                </div>
+                <div class="metric">
+                    <div class="metric-label">Produce Exchanged</div>
+                    <div class="metric-value"><span class="editable" id="produce">67</span><span class="metric-unit">lbs</span></div>
+                </div>
+            </div>
+        </div>
+
+        <div class="section">
+            <div class="section-title">COMMUNITY CONTRIBUTIONS</div>
+            <ul class="contributions-list" id="contributionsList">
+                <li class="contribution-item">North fence mended and reinforced</li>
+                <li class="contribution-item">50 lbs of grain donated to hutch</li>
+                <li class="contribution-item">New compost bin construction completed</li>
+                <li class="contribution-item">Community bulletin board installed</li>
+            </ul>
+        </div>
+
+        <div class="footer-message">
+            We are stronger together.
+        </div>
+
+        <div class="timestamp">
+            Last Updated: <span id="currentDate"></span>
+        </div>
+    </div>
+
+    <script>
+        // Load data from JSON file
+        async function loadHarvestData() {
+            try {
+                const response = await fetch('harvest-data.json');
+                const data = await response.json();
+                
+                // Update uptime
+                document.querySelector('.uptime-value').textContent = data.uptime;
+                document.querySelector('.uptime-details').textContent = data.uptimeDetails;
+                
+                // Update metrics
+                document.getElementById('loaves').textContent = data.metrics.loaves;
+                document.getElementById('books').textContent = data.metrics.books;
+                document.getElementById('eggs').textContent = data.metrics.eggs;
+                document.getElementById('seeds').textContent = data.metrics.seeds;
+                document.getElementById('plants').textContent = data.metrics.plants;
+                document.getElementById('produce').textContent = data.metrics.produce;
+                
+                // Update contributions
+                const contributionsList = document.getElementById('contributionsList');
+                contributionsList.innerHTML = '';
+                data.contributions.forEach(contribution => {
+                    const li = document.createElement('li');
+                    li.className = 'contribution-item';
+                    li.textContent = contribution;
+                    contributionsList.appendChild(li);
+                });
+                
+            } catch (error) {
+                console.error('Error loading harvest data:', error);
+                // Fallback to default values if JSON fails to load
+            }
+        }
+
+        // Display current date
+        function updateTimestamp() {
+            const now = new Date();
+            const options = { 
+                year: 'numeric', 
+                month: 'long', 
+                day: 'numeric',
+                hour: '2-digit',
+                minute: '2-digit'
+            };
+            document.getElementById('currentDate').textContent = now.toLocaleDateString('en-US', options);
+        }
+
+        // Initialize on page load
+        window.addEventListener('DOMContentLoaded', () => {
+            loadHarvestData();
+            updateTimestamp();
+        });
+
+        // Make values editable (simple click-to-edit functionality)
+        document.querySelectorAll('.editable').forEach(element => {
+            element.addEventListener('click', function() {
+                const currentValue = this.textContent;
+                const input = document.createElement('input');
+                input.type = 'number';
+                input.value = currentValue;
+                input.style.cssText = 'background: rgba(244, 232, 208, 0.95); color: #2d2416; border: 2px solid #8b7355; padding: 4px; border-radius: 3px; font-family: inherit; font-size: inherit; width: 80px;';
+                
+                input.addEventListener('blur', function() {
+                    element.textContent = this.value || currentValue;
+                });
+                
+                input.addEventListener('keypress', function(e) {
+                    if (e.key === 'Enter') {
+                        this.blur();
+                    }
+                });
+                
+                this.textContent = '';
+                this.appendChild(input);
+                input.focus();
+                input.select();
+            });
+        });
+
+        // Add ability to edit contributions
+        document.getElementById('contributionsList').addEventListener('click', function(e) {
+            if (e.target.classList.contains('contribution-item')) {
+                const currentText = e.target.textContent;
+                const input = document.createElement('input');
+                input.type = 'text';
+                input.value = currentText;
+                input.style.cssText = 'background: rgba(244, 232, 208, 0.95); color: #2d2416; border: 2px solid #8b7355; padding: 8px; border-radius: 3px; font-family: inherit; font-size: inherit; width: 100%;';
+                
+                input.addEventListener('blur', function() {
+                    e.target.textContent = this.value || currentText;
+                });
+                
+                input.addEventListener('keypress', function(event) {
+                    if (event.key === 'Enter') {
+                        this.blur();
+                    }
+                });
+                
+                e.target.textContent = '';
+                e.target.appendChild(input);
+                input.focus();
+                input.select();
+            }
+        });
+    </script>
+</body>
+</html>
